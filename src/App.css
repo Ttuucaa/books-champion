@@ -1,0 +1,23 @@
+.book-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  justify-items: center;
+}
+
+.new-book-form-container {
+  display: flex;
+  justify-content: center;
+}
+.tituloo {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.selected-book-text {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 20px 0;
+}
