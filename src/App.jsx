@@ -1,29 +1,39 @@
 import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import NewBook from './components/library/NewBook/NewBooks.jsx';
-import Books from './components/library/books/Books.jsx';
 import Login from './components/auth/login/Login.jsx';
-
+import Dashboard from './components/dashboard/Dashboard.jsx';
+import NotFound from './components/ui/NotFound.jsx';
+import Protected from './components/routingandprotected/Protected.jsx';
 
 const App = () => {
-  const [books, setBooks] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleBookAdded = (enteredBook) => {
-    setBooks((prevBooks) => {
-      return [enteredBook, ...prevBooks]
-    })
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
   };
 
   return (
-    <div>
-      <h1 className='tituloo'>Books Champion App</h1>
-      <div className="new-book-form-container">
-        <NewBook onBookAdded={handleBookAdded} />
-      </div>
-      <Books />
-      <Login />
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Route 
+          path="/dashboard/*" 
+          element={
+            <Protected isSignedIn={isAuthenticated}>
+              <Dashboard onLogout={handleLogout} />
+            </Protected>
+          } 
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

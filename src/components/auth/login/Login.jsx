@@ -1,50 +1,39 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button, Card, Col, Form, FormGroup, Row } from "react-bootstrap";
-import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+const Login = ({ onLogin }) => {
     const emailRef = useRef(null);
     const passwordRef = useRef(null);
  
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-
-    const handleLogin = (event) => {
-        event.preventDefault();
-
-        if (!emailRef.current.value.length) {
-            setErrors({...errors, email: true });
-            alert("El email es obligatorio");
-            emailRef.current.focus();
-            return;
-        }
-        else if (!password.length || password.length < 7) {
-            setErrors({...errors, password: true });
-            alert("La contraseña es obligatoria y debe tener al menos 7 caracteres");
-            passwordRef.current.focus();    
-            return;
-        }
-        setErrors({ email: false, password: false });
-        alert(`El email ingresado es: ${emailRef.current.value} y el password es ${passwordRef.current.value}`);
-       
-    }
-    const handleEmailChange = (event) => {
-        setEmail(event.target.value)
-    }
-
-    const handlePasswordChange = (event) => {
-        setPassword(event.target.value)
-    }
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        alert(`El email ingresado es: ${email} y el password es ${password}`)
-    }
-
     const [errors, setErrors] = useState({
         email: false,
         password: false
     });
+
+    const navigate = useNavigate();
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+
+        const email = emailRef.current.value;
+        const password = passwordRef.current.value;
+
+        if (!email.length) {
+            setErrors(prev => ({...prev, email: true }));
+            return;
+        }
+
+        if (password.length < 7) {
+            setErrors(prev => ({...prev, password: true }));
+            return;
+        }
+
+        setErrors({ email: false, password: false });
+        onLogin();
+        navigate("/dashboard");
+    }
+
     return (
         <>
             <Card className="mt-5 mx-3 p-3 px-5 shadow">
@@ -59,9 +48,7 @@ const Login = () => {
                                 required
                                 ref={emailRef}
                                 placeholder="Ingresar email"
-                                onChange={handleEmailChange}
-                                value={email}
-                                className={errors.email && "border border-danger"}
+                                className={errors.email ? "border border-danger" : ""}
                             />
                         </FormGroup>
                         <FormGroup className="mb-4">
@@ -71,9 +58,7 @@ const Login = () => {
                                 ref={passwordRef}
                                 autoComplete="current-password"
                                 placeholder="Ingresar contraseña"
-                                onChange={handlePasswordChange}
-                                value={password}
-                                className={errors.password && "border border-danger"}
+                                className={errors.password ? "border border-danger" : ""}
                             />
                         </FormGroup>
                         <Row>
