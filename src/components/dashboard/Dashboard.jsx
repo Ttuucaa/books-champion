@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect, use } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Books from "../library/books/Books";
 
 const Dashboard = ({ onLogout }) => {
+  useEffect(() => {
+    fetch("http://localhost:3000/books")
+      .then(res => res.json())
+      .then(data => setBookList(data))
+      .catch(err => console.error("Error fetching books:", err));
+  }, []);
   const books = [
     {
       id: 1,
