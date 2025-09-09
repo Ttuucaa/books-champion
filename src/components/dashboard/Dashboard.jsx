@@ -1,9 +1,10 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Books from "../library/books/Books";
 
 const Dashboard = ({ onLogout }) => {
+  const location = useLocation();
   useEffect(() => {
     fetch("http://localhost:3000/books")
       .then(res => res.json())
@@ -62,6 +63,15 @@ const Dashboard = ({ onLogout }) => {
   ];
 
   const [bookList, setBookList] = useState(books);
+
+  // Si venimos de AddBook con un libro nuevo, lo agregamos
+  useEffect(() => {
+    if (location.state && location.state.newBook) {
+      handleBookAdded(location.state.newBook);
+      // Limpiar el state para evitar agregarlo de nuevo si se refresca
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleBookAdded = (book) => {
     const bookData = {
