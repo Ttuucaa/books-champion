@@ -45,11 +45,23 @@ const Dashboard = ({ onLogout }) => {
     }
   };
 
-  const handleBookDeleted = (bookId) => {
+  const handleBookDeleted = async (bookId) => {
+  try {
+    const response = await fetch(`http://localhost:3000/books/${bookId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Error al eliminar el libro');
     setBookList((prevBookList) =>
       prevBookList.filter((book) => book.id !== bookId)
     );
-  };
+    // Opcional: notificación de éxito
+    // successToast('Libro eliminado correctamente');
+  } catch (error) {
+    console.error('Error eliminando libro:', error);
+    // Opcional: notificación de error
+    // errorToast('No se pudo eliminar el libro');
+  }
+};
 
   const navigate = useNavigate();
 
