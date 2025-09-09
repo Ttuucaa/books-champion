@@ -1,9 +1,10 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import BookSearch from '../BookSearch/BookSearch';
 import BookList from '../bookList/BookList';
 import BookForm from '../bookForm/bookForm';
 
-const Books = ({ books, onBookDeleted, onBookUpdated, onBookAdded }) => {
+function Books({ books, onBookDeleted, onBookSaved, setAddBookClickHandler }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [showBookForm, setShowBookForm] = useState(false);
     const [editingBook, setEditingBook] = useState(null);
@@ -23,12 +24,16 @@ const Books = ({ books, onBookDeleted, onBookUpdated, onBookAdded }) => {
         setShowBookForm(true);
     };
 
-    const handleFormSubmit = (bookData) => {
-        if (editingBook) {
-            onBookUpdated && onBookUpdated(bookData);
-        } else {
-            onBookAdded && onBookAdded(bookData);
+    // Permitir que Dashboard controle el botón de agregar libro solo una vez
+    useEffect(() => {
+        if (setAddBookClickHandler) {
+            setAddBookClickHandler(() => handleAddBookClick);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setAddBookClickHandler]);
+
+    const handleFormSubmit = (bookData) => {
+        onBookSaved && onBookSaved(bookData);
         setShowBookForm(false);
         setEditingBook(null);
     };
@@ -47,15 +52,17 @@ const Books = ({ books, onBookDeleted, onBookUpdated, onBookAdded }) => {
             <div style={{ marginTop: '-10px', marginBottom: '10px' }}>
                 <BookSearch onSearch={handleSearch} />
             </div>
-            <button
-                id="add-book-btn"
-                className="btn btn-success mb-3"
-                style={{ display: 'none' }}
-                onClick={handleAddBookClick}
-            >
-                Agregar libro
-            </button>
             <BookList books={filteredBooks} onBookSelect={handleBookSelect} onBookDeleted={onBookDeleted} />
+            {/* Detalles del libro solo si se está editando y el form está visible */}
+            {editingBook && showBookForm && (
+                <div className="mb-3 p-3 border rounded bg-light">
+                    <h4>Detalles del libro</h4>
+                    <p><strong>Título:</strong> {editingBook.title}</p>
+                    <p><strong>Autor:</strong> {editingBook.author}</p>
+                    <p><strong>Páginas:</strong> {editingBook.pageCount}</p>
+                    <p><strong>Resumen:</strong> {editingBook.summary}</p>
+                </div>
+            )}
             {showBookForm && (
                 <BookForm
                     book={editingBook}
@@ -66,6 +73,6 @@ const Books = ({ books, onBookDeleted, onBookUpdated, onBookAdded }) => {
             )}
         </div>
     );
-};
+}
 
 export default Books;
