@@ -8,7 +8,7 @@ const BookItem = ({ id, title, author, rating, pageCount, imageUrl, available, o
 
     const handleSelect = () => {
         if (onSelect) {
-            onSelect(title);
+            onSelect(id);
         }
     };
     const handleDelete = () => {

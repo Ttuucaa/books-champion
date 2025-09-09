@@ -73,12 +73,21 @@ const Dashboard = ({ onLogout }) => {
     }
   }, [location.state]);
 
+
   const handleBookAdded = (book) => {
     const bookData = {
       ...book,
       id: Math.random(),
     };
     setBookList((prevBookList) => [bookData, ...prevBookList]);
+  };
+
+  const handleBookUpdated = (updatedBook) => {
+    setBookList((prevBookList) =>
+      prevBookList.map((book) =>
+        book.id === updatedBook.id ? { ...book, ...updatedBook } : book
+      )
+    );
   };
 
   const handleBookDeleted = (bookId) => {
@@ -100,34 +109,34 @@ const Dashboard = ({ onLogout }) => {
 
   return (
     <>
-      <Button
-        style={{
-          position: "absolute",
-          top: 10,
-          right: 160,
-          padding: "6px 12px",
-          cursor: "pointer",
-        }}
-        variant="success"
-        onClick={handleNavigateAddBook}
-      >
-        Agregar libro
-      </Button>
-      <Button
-        style={{
-          position: "absolute",
-          top: 10,
-          right: 30,
-          padding: "6px 12px",
-          cursor: "pointer",
-        }}
-        variant="primary"
-        onClick={handleLogout}
-      >
-        Cerrar sesion
-      </Button>
-      <h2 className="text-center">Book champions app</h2>
-      <Books books={bookList} onBookDeleted={handleBookDeleted} />
+  {/* Botón 'Agregar libro' eliminado, ahora solo se usa el de Books.jsx */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', margin: '20px 0 10px 0' }}>
+        <Button
+          variant="success"
+          onClick={() => {
+            // Usar referencia para abrir el formulario en Books.jsx
+            const addBtn = document.getElementById('add-book-btn');
+            if (addBtn) addBtn.click();
+          }}
+        >
+          Agregar libro
+        </Button>
+        <Button
+          variant="primary"
+          onClick={handleLogout}
+        >
+          Cerrar sesión
+        </Button>
+      </div>
+      <h2 className="text-center" style={{ marginTop: '10px', marginBottom: '18px' }}>Book champions app</h2>
+      <div style={{ marginTop: '-10px' }}>
+        <Books
+          books={bookList}
+          onBookDeleted={handleBookDeleted}
+          onBookAdded={handleBookAdded}
+          onBookUpdated={handleBookUpdated}
+        />
+      </div>
     </>
   );
 };

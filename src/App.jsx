@@ -7,7 +7,6 @@ import Login from './components/auth/login/Login.jsx';
 import Dashboard from './components/dashboard/Dashboard.jsx';
 import NotFound from './components/ui/NotFound.jsx';
 import Protected from './components/routingandprotected/Protected.jsx';
-import AddBook from './components/library/addBook/AddBook.jsx';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -34,7 +33,6 @@ const App = () => {
               </Protected>
             } 
           />
-          <Route path="/library/add-book" element={<AddBook />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

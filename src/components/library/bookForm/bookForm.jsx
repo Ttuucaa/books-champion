@@ -1,41 +1,48 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button, Form } from "react-bootstrap";
-import { toast } from "react-toastify";
 
-const AddBook = () => {
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [rating, setRating] = useState(1);
-  const [pageCount, setPageCount] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [summary, setSummary] = useState("");
-  const navigate = useNavigate();
+import React, { useState, useEffect } from "react";
+import { Button, Form } from "react-bootstrap";
+
+const BookForm = ({ book, isEditing = false, onSubmit, onCancel }) => {
+  const safeBook = book || {};
+  const [title, setTitle] = useState(safeBook.title || "");
+  const [author, setAuthor] = useState(safeBook.author || "");
+  const [rating, setRating] = useState(safeBook.rating || 1);
+  const [pageCount, setPageCount] = useState(safeBook.pageCount || "");
+  const [imageUrl, setImageUrl] = useState(safeBook.imageUrl || "");
+  const [summary, setSummary] = useState(safeBook.summary || "");
+
+  useEffect(() => {
+    const b = book || {};
+    setTitle(b.title || "");
+    setAuthor(b.author || "");
+    setRating(b.rating || 1);
+    setPageCount(b.pageCount || "");
+    setImageUrl(b.imageUrl || "");
+    setSummary(b.summary || "");
+  }, [book]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim() || !author.trim()) {
-      toast.error("El título y el autor son obligatorios.");
+      // Aquí deberías usar errorToast de notifications.js
       return;
     }
-    const newBook = {
+    const bookData = {
+      ...book,
       title,
       author,
       rating: Number(rating),
       pageCount: Number(pageCount),
       imageUrl,
       summary,
-      available: true
+      available: true,
     };
-    toast.success("Libro agregado correctamente");
-    setTimeout(() => {
-      navigate("/dashboard", { state: { newBook } });
-    }, 1200);
+    onSubmit(bookData);
   };
 
   return (
     <div style={{ maxWidth: 500, margin: "40px auto" }}>
-      <h2>Agregar libro</h2>
+      <h2>{isEditing ? "Editar libro" : "Agregar libro"}</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
           <Form.Label>Título</Form.Label>
@@ -61,11 +68,15 @@ const AddBook = () => {
           <Form.Label>Resumen</Form.Label>
           <Form.Control as="textarea" rows={3} value={summary} onChange={e => setSummary(e.target.value)} />
         </Form.Group>
-        <Button variant="success" type="submit">Agregar</Button>
-        <Button variant="secondary" style={{marginLeft: 10}} onClick={() => navigate("/dashboard")}>Cancelar</Button>
+        <Button variant="primary" type="submit">
+          {isEditing ? "Editar lectura" : "Agregar lectura"}
+        </Button>
+        <Button variant="secondary" style={{ marginLeft: 10 }} onClick={onCancel}>
+          Cancelar
+        </Button>
       </Form>
     </div>
   );
 };
 
-export default AddBook;
+export default BookForm;
