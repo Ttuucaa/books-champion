@@ -23,10 +23,14 @@ const BookForm = ({ book, isEditing = false, onSubmit, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("BookForm handleSubmit called with:", { title, author, rating, pageCount, imageUrl, summary });
+    
     if (!title.trim() || !author.trim()) {
+      console.log("Validation failed: title or author empty");
       // Aquí deberías usar errorToast de notifications.js
       return;
     }
+    
     const bookData = {
       ...book,
       title,
@@ -37,6 +41,8 @@ const BookForm = ({ book, isEditing = false, onSubmit, onCancel }) => {
       summary,
       available: true,
     };
+    
+    console.log("Calling onSubmit with bookData:", bookData);
     onSubmit(bookData);
   };
 

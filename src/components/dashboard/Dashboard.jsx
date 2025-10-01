@@ -2,66 +2,60 @@ import { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Books from "../library/books/Books";
-import { successToast } from "../library/notifications/notifications";
+import { getBooks, addBook, deleteBook } from "./Dashboard.services.js";
+import { errorToast, successToast } from "../library/notifications/notifications";
 
 const Dashboard = ({ onLogout }) => {
 
   const [bookList, setBookList] = useState([]);
   useEffect(() => {
-    fetch("http://localhost:3000/books")
-      .then(res => res.json())
-      .then(data => setBookList(data))
-      .catch(err => console.error("Error fetching books:", err));
+    getBooks({
+      onSuccess: (data) => setBookList(data),
+      onError: (error) => {
+        console.error("Error fetching books:", error);
+        errorToast(typeof error === 'string' ? error : error.message || "Error al cargar libros");
+      }
+    });
   }, []);
 
-  const handleBookSaved = async (book) => {
-    try {
-      let response;
-      if (book.id) {
-        response = await fetch(`http://localhost:3000/books/${book.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(book)
+  const handleBookSaved = (book) => {
+    console.log("Dashboard handleBookSaved called with:", book);
+    
+    addBook(book, {
+      onSuccess: (message) => {
+        console.log("addBook success:", message);
+        setBookList(prev => {
+          if (book.id) {
+            // Actualizar libro existente
+            return prev.map(b => b.id === book.id ? { ...b, ...book } : b);
+          } else {
+            // Agregar nuevo libro
+            return [{ ...book, id: Math.random() }, ...prev];
+          }
         });
-      } else {
-        response = await fetch('http://localhost:3000/books', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(book)
-        });
+        successToast(message || "Libro guardado exitosamente");
+      },
+      onError: (error) => {
+        console.error("addBook error:", error);
+        errorToast(typeof error === 'string' ? error : error.message || "Error al guardar libro");
       }
-      if (!response.ok) throw new Error('Error en la operacion');
-      const savedBook = await response.json();
-      setBookList(prev => {
-        if (book.id) {
-          return prev.map(b => b.id === book.id ? { ...b, ...savedBook } : b);
-        } else {
-          return [{ ...savedBook, id: Math.random() }, ...prev];
-        }
-      });
-      successToast('Libro guardado correctamente');
-    } catch (error) {
-      console.error("Error saving book:", error);
-    }
+    });
   };
 
-  const handleBookDeleted = async (bookId) => {
-  try {
-    const response = await fetch(`http://localhost:3000/books/${bookId}`, {
-      method: 'DELETE',
+  const handleBookDeleted = (bookId) => {
+    deleteBook(bookId, {
+      onSuccess: () => {
+        setBookList((prevBookList) =>
+          prevBookList.filter((book) => book.id !== bookId)
+        );
+        successToast("Libro eliminado exitosamente");
+      },
+      onError: (error) => {
+        console.error("Error deleting book:", error);
+        errorToast(typeof error === 'string' ? error : error.message || "Error al eliminar libro");
+      }
     });
-    if (!response.ok) throw new Error('Error al eliminar el libro');
-    setBookList((prevBookList) =>
-      prevBookList.filter((book) => book.id !== bookId)
-    );
-    // Opcional: notificación de éxito
-    // successToast('Libro eliminado correctamente');
-  } catch (error) {
-    console.error('Error eliminando libro:', error);
-    // Opcional: notificación de error
-    // errorToast('No se pudo eliminar el libro');
-  }
-};
+  };
 
   const navigate = useNavigate();
 
@@ -70,12 +64,12 @@ const Dashboard = ({ onLogout }) => {
     navigate("/login");
   };
 
+  // Estado para controlar el modal de agregar libro
+  const [showAddBook, setShowAddBook] = useState(false);
 
-
-  // Handler para el botón agregar libro
-  let addBookClickHandler = null;
-  const setAddBookClickHandler = (handler) => {
-    addBookClickHandler = handler;
+  const handleAddBookClick = () => {
+    console.log("Add book button clicked");
+    setShowAddBook(true);
   };
 
   return (
@@ -88,7 +82,7 @@ const Dashboard = ({ onLogout }) => {
           id="add-book-btn"
           className="btn btn-success"
           style={{ marginRight: '8px' }}
-          onClick={() => addBookClickHandler && addBookClickHandler()}
+          onClick={handleAddBookClick}
         >
           Agregar libro
         </Button>
@@ -105,7 +99,8 @@ const Dashboard = ({ onLogout }) => {
         books={bookList}
         onBookDeleted={handleBookDeleted}
         onBookSaved={handleBookSaved}
-        setAddBookClickHandler={setAddBookClickHandler}
+        showAddBook={showAddBook}
+        setShowAddBook={setShowAddBook}
       />
     </div>
   );
