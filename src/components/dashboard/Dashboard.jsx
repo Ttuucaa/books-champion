@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Books from "../library/books/Books";
@@ -18,7 +18,7 @@ const Dashboard = ({ onLogout }) => {
     });
   }, []);
 
-  const handleBookSaved = (book) => {
+  const handleBookSaved = useCallback((book) => {
     console.log("Dashboard handleBookSaved called with:", book);
     
     addBook(book, {
@@ -40,9 +40,9 @@ const Dashboard = ({ onLogout }) => {
         errorToast(typeof error === 'string' ? error : error.message || "Error al guardar libro");
       }
     });
-  };
+  }, []);
 
-  const handleBookDeleted = (bookId) => {
+  const handleBookDeleted = useCallback((bookId) => {
     deleteBook(bookId, {
       onSuccess: () => {
         setBookList((prevBookList) =>
@@ -51,26 +51,25 @@ const Dashboard = ({ onLogout }) => {
         successToast("Libro eliminado exitosamente");
       },
       onError: (error) => {
-        console.error("Error deleting book:", error);
         errorToast(typeof error === 'string' ? error : error.message || "Error al eliminar libro");
       }
     });
-  };
+  }, []);
 
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     onLogout();
     navigate("/login");
-  };
+  }, [onLogout, navigate]);
 
   // Estado para controlar el modal de agregar libro
   const [showAddBook, setShowAddBook] = useState(false);
 
-  const handleAddBookClick = () => {
+  const handleAddBookClick = useCallback(() => {
     console.log("Add book button clicked");
     setShowAddBook(true);
-  };
+  }, []);
 
   return (
     <div>
